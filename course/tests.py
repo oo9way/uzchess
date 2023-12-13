@@ -65,6 +65,10 @@ class CourseTests(APITestCase):
             obj = models.CourseComment.objects.create(**course_comment)
             return obj
         
+        def create_lesson(course):
+            course_lesson.update({"course":course})
+            obj = models.CourseLesson.objects.create(**course_lesson)
+            return obj
         
         self.user = user
         self.course = course_data
@@ -76,6 +80,7 @@ class CourseTests(APITestCase):
         self.user = user
         self.create_course = create_course
         self.create_comment = create_comment
+        self.create_lesson = create_lesson
 
     def test_get_null_course(self):
         response = self.client.get(reverse('course-list'))
@@ -267,4 +272,59 @@ class CourseTests(APITestCase):
 
         response = self.client.delete(reverse('delete-comment', kwargs={"pk":comment.pk}))
         
+        self.assertEqual(response.status_code, 403)
+
+    def test_create_lesson(self):
+        self.client.force_authenticate(self.admin)
+        course = self.create_course()
+
+        response = self.client.post(reverse('create-lesson'), data=self.course_lesson)
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_lesson_without_auth_or_user(self):
+        course = self.create_course()
+        response = self.client.post(reverse('create-lesson'), data=self.course_lesson)
+
+        self.assertEqual(response.status_code, 403)
+
+        self.client.force_authenticate(self.user)
+        response = self.client.post(reverse('create-lesson'), data=self.course_lesson)
+        self.assertEqual(response.status_code, 403)
+
+
+    def test_update_lesson(self):
+        course = self.create_course()
+        lesson = self.create_lesson(course)
+
+        self.client.force_authenticate(self.admin)
+        
+        course_lesson = {
+            "course": 1,
+            "title":"Updated",
+            "body":"Updated body",
+            "active": True
+        }
+
+        response = self.client.patch(reverse('update-lesson', kwargs={"pk":lesson.pk}), data=course_lesson)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['body'], course_lesson['body'])
+
+    def test_update_lesson_with_user_or_unauthenticated(self):
+        course = self.create_course()
+        lesson = self.create_lesson(course)
+        
+        course_lesson = {
+            "course": 1,
+            "title":"Updated",
+            "body":"Updated body",
+            "active": True
+        }
+
+        response = self.client.patch(reverse('update-lesson', kwargs={"pk":lesson.pk}), data=course_lesson)
+        self.assertEqual(response.status_code, 403)
+
+
+        self.client.force_authenticate(self.user)
+        response = self.client.patch(reverse('update-lesson', kwargs={"pk":lesson.pk}), data=course_lesson)
         self.assertEqual(response.status_code, 403)

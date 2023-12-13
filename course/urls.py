@@ -18,9 +18,9 @@ urlpatterns = [
     path('comments/delete/<int:pk>/', views.CourseCommentsDeleteAPIView.as_view(), name='delete-comment'), # Delete course comment #Tested
 
     # Course lessons
-    path('lessons/create/', views.CourseLessonCreateAPIView.as_view()), # Create course lesson
-    path('lessons/update/<int:pk>/', views.CourseLessonUpdateAPIView.as_view()), # Update course lesson
-    path('lessons/delete/<int:pk>/', views.CourseLessonDestroyAPIView.as_view()), # Delete course lesson
+    path('lessons/create/', views.CourseLessonCreateAPIView.as_view(), name='create-lesson'), # Create course lesson #Tested
+    path('lessons/update/<int:pk>/', views.CourseLessonUpdateAPIView.as_view(), name='update-lesson'), # Update course lesson
+    path('lessons/delete/<int:pk>/', views.CourseLessonDestroyAPIView.as_view(), name='delete-lesson'), # Delete course lesson
 
     # Subscribe to course
     path('subscribe/<str:course_slug>/', views.CourseSubscribeAPIView.as_view()), # Subscribe to course
