@@ -19,12 +19,10 @@ urlpatterns = [
 
     # Course lessons
     path('lessons/create/', views.CourseLessonCreateAPIView.as_view(), name='create-lesson'), # Create course lesson #Tested
-    path('lessons/update/<int:pk>/', views.CourseLessonUpdateAPIView.as_view(), name='update-lesson'), # Update course lesson
-    path('lessons/delete/<int:pk>/', views.CourseLessonDestroyAPIView.as_view(), name='delete-lesson'), # Delete course lesson
+    path('lessons/update/<int:pk>/', views.CourseLessonUpdateAPIView.as_view(), name='update-lesson'), # Update course lesson #Tested
+    path('lessons/delete/<int:pk>/', views.CourseLessonDestroyAPIView.as_view(), name='delete-lesson'), # Delete course lesson #Tested
 
     # Subscribe to course
-    path('subscribe/<str:course_slug>/', views.CourseSubscribeAPIView.as_view()), # Subscribe to course
-    path('unsubscribe/<str:course_slug>/', views.CourseUnsubscribeAPIView.as_view()), # Unsubscribe to course
-
-
+    path('subscribe/<str:course_slug>/', views.CourseSubscribeAPIView.as_view(), name='subscribe-user'), # Subscribe to course #Tested
+    path('unsubscribe/<str:course_slug>/', views.CourseUnsubscribeAPIView.as_view(), name='unsubscribe-user'), # Unsubscribe to course #Tested
 ]

@@ -328,3 +328,70 @@ class CourseTests(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.patch(reverse('update-lesson', kwargs={"pk":lesson.pk}), data=course_lesson)
         self.assertEqual(response.status_code, 403)
+
+    def test_delete_lesson(self):
+        self.client.force_authenticate(self.admin)
+        course = self.create_course()
+        lesson = self.create_lesson(course)
+
+        response = self.client.delete(reverse('delete-lesson', kwargs={"pk":lesson.pk}))
+        self.assertEqual(response.status_code, 204)
+
+    def test_delete_lesson_with_user(self):
+        self.client.force_authenticate(self.user)
+        course = self.create_course()
+        lesson = self.create_lesson(course)
+
+        response = self.client.delete(reverse('delete-lesson', kwargs={"pk":lesson.pk}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_lesson_unauth(self):
+        course = self.create_course()
+        lesson = self.create_lesson(course)
+
+        response = self.client.delete(reverse('delete-lesson', kwargs={"pk":lesson.pk}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_subscribe_user(self):
+        self.client.force_authenticate(self.admin)
+        course = self.create_course()
+
+        response = self.client.post(reverse('subscribe-user', kwargs={"course_slug":course.slug}))
+        self.assertEqual(response.status_code, 201)
+
+    def test_double_subscribe_user(self):
+        self.client.force_authenticate(self.admin)
+        course = self.create_course()
+
+        response = self.client.post(reverse('subscribe-user', kwargs={"course_slug":course.slug}))
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.post(reverse('subscribe-user', kwargs={"course_slug":course.slug}))
+        self.assertEqual(response.status_code, 208)
+
+    def test_subscribe_without_user(self):
+        course = self.create_course()
+
+        response = self.client.post(reverse('subscribe-user', kwargs={"course_slug":course.slug}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_unsubscribe_user(self):
+        self.client.force_authenticate(self.admin)
+        course = self.create_course()
+
+        subscribe = self.client.post(reverse('subscribe-user', kwargs={"course_slug":course.slug}))
+        self.assertEqual(subscribe.status_code, 201)
+
+        response = self.client.post(reverse('unsubscribe-user', kwargs={"course_slug":course.slug}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_unsubscribe_without_user(self):
+        course = self.create_course()
+        response = self.client.post(reverse('unsubscribe-user', kwargs={"course_slug":course.slug}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_unsubscribe_unsubscribed_user(self):
+        self.client.force_authenticate(self.admin)
+        course = self.create_course()
+        response = self.client.post(reverse('unsubscribe-user', kwargs={"course_slug":course.slug}))
+        self.assertEqual(response.status_code, 204)
