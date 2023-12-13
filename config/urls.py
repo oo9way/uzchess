@@ -35,6 +35,17 @@ urlpatterns += [
     ),
 ]
 
+
+# urls.py
+from django.urls import path
+
+def trigger_error(request):
+    division_by_zero = 1 / 0
+
+urlpatterns += [
+    path('sentry-debug/', trigger_error),
+]
+
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit
     # these url in browser to see how these error pages look like.

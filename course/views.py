@@ -54,7 +54,7 @@ class CourseCategoryAPIView(generics.ListCreateAPIView):
 class CourseCommentCreateAPIView(generics.CreateAPIView):
     queryset = models.CourseComment.objects.all()
     serializer_class = serializers.CourseCommentCreateDeleteSerializer
-    permission_classes = [permissions.DefaultMethodsPermission]
+    permission_classes = [IsAuthenticated, permissions.IsOwnerOfObject]
 
     # Setting user for course comments
     def perform_create(self, serializer):
@@ -65,14 +65,14 @@ class CourseCommentCreateAPIView(generics.CreateAPIView):
 class CourseCommentUpdateAPIView(generics.UpdateAPIView):
     queryset = models.CourseComment.objects.all()
     serializer_class = serializers.CourseCommentUpdateSerializer
-    permission_classes = [permissions.DefaultMethodsPermission, permissions.IsOwnerOfObject]
+    permission_classes = [IsAuthenticated, permissions.IsOwnerOfObject]
 
 
 # Course Comments Delete view
 class CourseCommentsDeleteAPIView(generics.DestroyAPIView):
     queryset = models.CourseComment.objects.all()
     serializer_class = serializers.CourseCommentCreateDeleteSerializer
-    permission_classes = [permissions.DefaultMethodsPermission, permissions.IsOwnerOfObject]
+    permission_classes = [IsAuthenticated, permissions.IsOwnerOfObject]
 
 
 # Course Lessons Create view

@@ -6,16 +6,16 @@ urlpatterns = [
     path('categories/', views.CourseCategoryAPIView.as_view()),
 
     # Courses and details
-    path('list/', views.CourseAPIView.as_view(), name='course-list'), # List courses
-    path('create/', views.CourseCreateAPIView.as_view(), name='course-create'), # Create course
-    path('details/<str:slug>/', views.CourseDetailsView.as_view()), # Course details
-    path('update/<str:slug>/', views.CourseUpdateView.as_view()), # Update course
-    path('delete/<str:slug>/', views.CourseDestroyView.as_view()), # Delete course
+    path('list/', views.CourseAPIView.as_view(), name='course-list'), # List courses #Tested
+    path('create/', views.CourseCreateAPIView.as_view(), name='course-create'), # Create course #Tested
+    path('details/<str:slug>/', views.CourseDetailsView.as_view(), name='course-details'), # Course details #Tested
+    path('update/<str:slug>/', views.CourseUpdateView.as_view(), name='update-course'), # Update course #Tested
+    path('delete/<str:slug>/', views.CourseDestroyView.as_view(), name='delete-course'), # Delete course #Tested
 
     # Course comments
-    path('comments/create/', views.CourseCommentCreateAPIView.as_view()), # Create course comment
-    path('comments/update/<int:pk>/', views.CourseCommentUpdateAPIView.as_view()), # Update course comment
-    path('comments/delete/<int:pk>/', views.CourseCommentsDeleteAPIView.as_view()), # Delete course comment
+    path('comments/create/', views.CourseCommentCreateAPIView.as_view(), name='create-comment'), # Create course comment #Tested
+    path('comments/update/<int:pk>/', views.CourseCommentUpdateAPIView.as_view(), name='update-comment'), # Update course comment #Tested
+    path('comments/delete/<int:pk>/', views.CourseCommentsDeleteAPIView.as_view(), name='delete-comment'), # Delete course comment #Tested
 
     # Course lessons
     path('lessons/create/', views.CourseLessonCreateAPIView.as_view()), # Create course lesson

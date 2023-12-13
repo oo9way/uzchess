@@ -79,7 +79,8 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
-    "django_filters"
+    "django_filters",
+
 ]
 
 LOCAL_APPS = [
@@ -138,8 +139,31 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    'querycount.middleware.QueryCountMiddleware'
+    'querycount.middleware.QueryCountMiddleware',
+    'course.middleware.ErrorHandlerMiddleware'
 ]
+
+TELEGRAM_BOT_NAME = 'Django'
+TELEGRAM_BOT_TOKEN = '6545930354:AAHhY_eh2rqs_mSrcFg60TWUoKCtohc9lFY'
+
+# TELEGRAM_BOT_WEBHOOK_URL = 'https://<your-domain>/bot/web-hook/'
+TELEGRAM_BOT_PROJECT_NAME = 'My local app'
+TELEGRAM_BOT_ALLOW_SEND_IN_DEBUG_MODE = False
+
+
+# settings.py
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://c46530f5ab6ea6df2b503ddb9631b582@o4506380788695040.ingest.sentry.io/4506380789809152",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
 
 # STATIC
 # ------------------------------------------------------------------------------
