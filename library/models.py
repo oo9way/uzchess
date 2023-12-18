@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.db.models import Sum
+from django.contrib.auth import get_user_model
 
 # Base Model class
 class BaseModel(models.Model):
@@ -27,4 +28,103 @@ class Book(BaseModel):
     author = models.CharField(max_length=255, null=True, blank=True)
     pages_count = models.IntegerField(default=0)
     publish_date = models.DateField(null=True, blank=True)
+    count = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
 
+
+    def active(self):
+        if self.is_active and self.count > 0:
+            return True
+        return False
+
+
+    def can_buy(self, qty = 0):
+        # get holded books count
+        holded_books = OrderItem.objects.filter(book=self, is_active=True).aggregate(total_qty=Sum('qty'))['total_qty'] or 0
+
+        # return result 
+        return self.count - holded_books  >= qty and self.active()
+
+
+class Order(models.Model):
+    STATUS = (
+        ('initial', "Initial"),
+        ('payment', "Payment"),
+        ('delivery', "Delivery"),
+        ('completed', "Completed"),
+    )
+
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=128)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+
+    total_price = models.IntegerField(default=0)
+    total_discount = models.IntegerField(default=0)
+    total_coupon = models.IntegerField(default=0)
+    delivery_price = models.IntegerField(default=0)
+
+    status = models.CharField(max_length=16, choices=STATUS, default='initial')
+
+    def get_total(self):
+        return self.total_discount - self.total_coupon + self.delivery_price
+  
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    qty = models.PositiveIntegerField(default=0)
+    price = models.DecimalField(max_digits=15, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+
+
+class Cart(models.Model):
+    STATUS_CHOICES = (
+        ('initial', 'Initial'),
+        ('completed', 'Completed'),
+    )
+
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True)
+    qty = models.PositiveIntegerField(default=0)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='initial')
+
+    
+    def update_qty(self, qty):
+        can_buy = Book.can_buy(book=self.book, qty=qty)
+        if can_buy:
+            self.qty = qty
+            self.save()
+            return True
+        return False
+
+
+    @classmethod
+    def create_order(cls, user):
+        carts = Cart.objects.filter(user=user, status='initial')
+        all_available = all([Book.can_buy(cart.book, cart.qty) for cart in carts])
+
+        if not all_available:
+            return False
+
+        if len(carts) > 0:
+            order = Order.objects.create(user=user)
+
+            total_price = 0
+            total_discount  = 0
+
+            for cart in carts:
+                cart.status = 'completed'
+                cart.save()
+
+                total_price += cart.book.price * cart.qty
+                total_discount += cart.book.discount_price * cart.qty
+
+                OrderItem.objects.create(order=order, book=cart.book, price=cart.book.discount_price, qty=cart.qty)
+
+
+            order.total_price = total_price
+            order.total_discount = total_discount
+            order.save()
+            return True
+        return False

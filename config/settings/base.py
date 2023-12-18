@@ -87,7 +87,7 @@ LOCAL_APPS = [
     "users",
     "news",
     "course",
-    "library"
+    "library",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

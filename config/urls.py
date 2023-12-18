@@ -16,6 +16,8 @@ urlpatterns = [
     path("api/v1/news/", include("news.urls")),
     path("api/v1/courses/", include("course.urls")),
     path("api/v1/library/", include("library.urls")),
+    path("api/v1/cart/", include("library.cart_urls")),
+    path("api/v1/orders/", include("library.order_urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
