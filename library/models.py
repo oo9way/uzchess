@@ -100,31 +100,30 @@ class Cart(models.Model):
 
 
     @classmethod
-    def create_order(cls, user):
+    def create_order(cls, user, name, phone):
         carts = Cart.objects.filter(user=user, status='initial')
         all_available = all([Book.can_buy(cart.book, cart.qty) for cart in carts])
 
         if not all_available:
             return False
 
-        if len(carts) > 0:
-            order = Order.objects.create(user=user)
+        
+        order = Order.objects.create(user=user, name=name, phone=phone)
 
-            total_price = 0
-            total_discount  = 0
+        total_price = 0
+        total_discount  = 0
 
-            for cart in carts:
-                cart.status = 'completed'
-                cart.save()
+        for cart in carts:
+            cart.status = 'completed'
+            cart.save()
 
-                total_price += cart.book.price * cart.qty
-                total_discount += cart.book.discount_price * cart.qty
+            total_price += cart.book.price * cart.qty
+            total_discount += cart.book.discount_price * cart.qty
 
-                OrderItem.objects.create(order=order, book=cart.book, price=cart.book.discount_price, qty=cart.qty)
+            OrderItem.objects.create(order=order, book=cart.book, price=cart.book.discount_price, qty=cart.qty)
 
 
-            order.total_price = total_price
-            order.total_discount = total_discount
-            order.save()
-            return True
-        return False
+        order.total_price = total_price
+        order.total_discount = total_discount
+        order.save()
+        return True

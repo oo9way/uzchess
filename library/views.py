@@ -57,7 +57,14 @@ class CartAddItemAPIView(views.APIView):
         book = get_object_or_404(models.Book, pk=book_id)
 
         if book.can_buy(qty):
-            cart = models.Cart.objects.filter(user=request.user, book=book)
+            carts = models.Cart.objects.filter(user=request.user, book=book)
+            if carts.exists():
+                cart = carts.first()
+                cart.qty = qty
+                cart.save()
+            else:
+                cart = models.Cart.objects.create(user=request.user, book=book, qty=qty)
+            
             return Response(data=serializers.CartSerializer(cart).data, status=status.HTTP_201_CREATED)
         else:
             raise ValidationError({'qty':'Insufficient quantity'})        
@@ -77,3 +84,20 @@ class CartRemoveItemAPIView(views.APIView):
         cart_item.delete()
         
         return Response({"message":"Cart item deleted"}, status=status.HTTP_204_NO_CONTENT)
+    
+    
+class CreateOrderAPIView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request):
+        name = self.request.data['name']
+        phone = self.request.data['phone']
+        cart = models.Cart
+        if len(cart.objects.filter(user=request.user, status='initial'))<=0:
+            return Response({'message':'No products'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if cart.create_order(request.user, name, phone):
+            return Response({"message":"Order created"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'message':'Insufficient quantity'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
