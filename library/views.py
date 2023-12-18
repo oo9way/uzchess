@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from library import models, serializers
 from rest_framework import generics, permissions, views, status
 from rest_framework.response import Response
@@ -57,7 +58,7 @@ class CartAddItemAPIView(views.APIView):
         book = get_object_or_404(models.Book, pk=book_id)
 
         if book.can_buy(qty):
-            carts = models.Cart.objects.filter(user=request.user, book=book)
+            carts = models.Cart.objects.filter(user=request.user, book=book, status='initial')
             if carts.exists():
                 cart = carts.first()
                 cart.qty = qty
@@ -100,4 +101,14 @@ class CreateOrderAPIView(views.APIView):
             return Response({"message":"Order created"}, status=status.HTTP_204_NO_CONTENT)
         return Response({'message':'Insufficient quantity'}, status=status.HTTP_400_BAD_REQUEST)
         
-        
+
+class OrderListAPIView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.OrderSerializer
+    queryset = models.Order.objects.all()
+    
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+        queryset.filter(user=self.request.user)
+        return queryset
+    

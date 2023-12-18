@@ -1,6 +1,12 @@
 from django.db import models
 from django.db.models import Sum
 from django.contrib.auth import get_user_model
+import random
+
+def randomnumber(N):
+	minimum = pow(10, N-1)
+	maximum = pow(10, N) - 1
+	return random.randint(minimum, maximum)
 
 # Base Model class
 class BaseModel(models.Model):
@@ -47,12 +53,15 @@ class Book(BaseModel):
 
 
 class Order(models.Model):
+    
     STATUS = (
         ('initial', "Initial"),
         ('payment', "Payment"),
         ('delivery', "Delivery"),
         ('completed', "Completed"),
     )
+    
+    order_number = models.CharField(max_length=10, default=randomnumber(10))
 
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=128)
@@ -121,6 +130,9 @@ class Cart(models.Model):
             total_discount += cart.book.discount_price * cart.qty
 
             OrderItem.objects.create(order=order, book=cart.book, price=cart.book.discount_price, qty=cart.qty)
+            
+            cart.book.count = cart.book.count - cart.qty
+            cart.book.save()
 
 
         order.total_price = total_price
