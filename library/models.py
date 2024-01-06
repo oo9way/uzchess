@@ -117,18 +117,17 @@ class Cart(models.Model):
 
         total_price = 0
         total_discount = 0
+        order_items = []
 
         for cart in carts:
-            cart.status = "completed"
-            cart.save()
-
             total_price += cart.book.price * cart.qty
             total_discount += cart.book.discount_price * cart.qty
 
-            OrderItem.objects.create(order=order, book=cart.book, price=cart.book.discount_price, qty=cart.qty)
+            order_item = OrderItem(order=order, book=cart.book, price=cart.book.discount_price, qty=cart.qty)
+            order_items.append(order_item)
 
-            cart.book.count = cart.book.count - cart.qty
-            cart.book.save()
+        carts.update(status="completed")
+        OrderItem.objects.bulk_create(order_items)
 
         order.total_price = total_price
         order.total_discount = total_discount
